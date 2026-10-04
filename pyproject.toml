@@ -28,7 +28,7 @@ dev = [
   "mypy>=1.13,<2",
   "pytest>=8.3,<9",
   "pytest-cov>=6,<7",
-  "ruff>=0.8,<1",
+  "ruff>=0.16.10,<1",
 ]
 
 [tool.hatch.build.targets.wheel]
