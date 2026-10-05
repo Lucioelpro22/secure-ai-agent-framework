@@ -23,7 +23,11 @@ def validate_action(request: ActionRequest) -> None:
     ):
         if not isinstance(value, str) or not _IDENTIFIER.fullmatch(value):
             raise ActionValidationError(f"invalid {label}")
-    if not request.resource or len(request.resource) > 512:
+    if (
+        not isinstance(request.resource, str)
+        or not request.resource
+        or len(request.resource) > 512
+    ):
         raise ActionValidationError("invalid resource")
     if (
         ".." in request.resource

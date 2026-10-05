@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
+from .parameters import freeze_parameters, parameter_values
+
 
 class Decision(StrEnum):
     ALLOW = "allow"
@@ -69,6 +71,13 @@ class ActionRequest:
     operation: str
     parameters: Mapping[str, Any] = field(default_factory=dict)
     approval_token: ApprovalToken | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "parameters", freeze_parameters(self.parameters))
+
+    def to_arguments(self) -> dict[str, Any]:
+        """Copy the exact parameter snapshot for a trusted execution adapter."""
+        return {key: parameter_values(value) for key, value in self.parameters.items()}
 
 
 @dataclass(frozen=True, slots=True)

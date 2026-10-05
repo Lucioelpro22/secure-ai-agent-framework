@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.25,<2"]
+requires = ["hatchling>=1.32.4,<2"]
 build-backend = "hatchling.build"
 
 [project]
@@ -25,10 +25,10 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
-  "mypy>=1.13,<2",
-  "pytest>=8.3,<9",
-  "pytest-cov>=6,<7",
-  "ruff>=0.8,<1",
+  "mypy>=2.4.0,<3",
+  "pytest>=9.1.1,<10",
+  "pytest-cov>=7.1.0,<8",
+  "ruff>=0.16.10,<1",
 ]
 
 [tool.hatch.build.targets.wheel]

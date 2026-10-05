@@ -15,6 +15,8 @@ from concurrent.futures import TimeoutError as FutureTimeout
 from dataclasses import dataclass, field
 from typing import Any
 
+from .parameters import freeze_parameters, parameter_values
+
 ToolCallable = Callable[..., Any]
 Validator = Callable[[Mapping[str, Any]], None]
 
@@ -175,7 +177,13 @@ class ToolRunner:
     ) -> dict[str, Any]:
         if not isinstance(arguments, Mapping):
             raise ToolError("arguments must be a mapping")
-        normalized = dict(arguments)
+        try:
+            normalized = {
+                key: parameter_values(value)
+                for key, value in freeze_parameters(arguments).items()
+            }
+        except ValueError as exc:
+            raise ToolError("input must contain only finite JSON values") from exc
         self._check_size(normalized, self.policy.max_input_bytes, "input")
         if spec.validator is not None:
             try:
