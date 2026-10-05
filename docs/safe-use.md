@@ -48,3 +48,28 @@ Do not expose `run_shell(command: str)`, `fetch_url(url: str)`, or `send_email(t
 ## Incident response
 
 If an agent behaves unexpectedly: revoke its credentials, disable side-effecting tools, preserve redacted audit events, identify the policy and model versions, inspect downstream systems, and rotate any exposed secrets. Do not resume execution until the root cause and blast radius are understood.
+
+## Parameter snapshots and token lifetime
+
+`ActionRequest` copies its parameters into immutable nested mappings and tuples.
+Parameters must use finite JSON values and string keys; recursive values and
+non-JSON objects are rejected. Approval digests cover the subject, action,
+resource, operation, and every nested parameter. Object key order does not
+change a digest; array order does. Changing a recipient, body, or other argument
+requires a new request and approval.
+
+After authorization, pass `request.to_arguments()` to your trusted execution
+adapter, or use the frozen `request.parameters` with `ToolRequest`. Do not return
+to the mutable dictionary that was originally used to construct the request.
+Approval tokens authenticate their identity, subject, digest, issue time, and
+expiry, with a positive lifetime of at most one hour. Timestamps must include a
+timezone. Previously issued tokens using the older signature scheme must be
+reissued after upgrading.
+
+Single use is atomic across threads sharing one `ApprovalAuthority`. Replay
+state is in memory: keep that instance alive for the lifetime of its key. This
+implementation does not coordinate separate processes or survive a restart.
+Use a durable atomic replay store in a production adapter before sharing a
+signing key across workers, or rotate the key when the authority restarts. The
+application must separately bind the approving human, tenant, and policy
+version; `subject` identifies the requesting agent.
